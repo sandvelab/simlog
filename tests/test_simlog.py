@@ -25,9 +25,10 @@ def test_get_arrays():
     arrays = get_arrays()
     assert np.array(arrays).shape == (100, 1000)
 
+
 def test_get_lowest_fdr(p_values):
     fdrs = get_lowest_fdr()
-    assert np.array(fdr).shape == (3,)
+    assert np.array(fdrs).shape == (3,)
 
 def test_get_pvalues_per_index(list1, list2):
     values = get_pvalues_per_index(list1, list2)
