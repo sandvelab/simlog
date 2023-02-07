@@ -11,7 +11,6 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = ['typer', ]
-
 test_requirements = ['pytest>=3', "hypothesis"]
 
 setup(
