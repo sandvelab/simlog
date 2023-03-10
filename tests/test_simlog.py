@@ -2,6 +2,8 @@
 """Tests for `simlog` package."""
 import pytest
 import numpy as np
+
+from simlog.logger import HLogger
 from simlog.simlog import get_arrays, get_pvalues_per_index, get_lowest_fdr
 
 def test():
@@ -34,8 +36,17 @@ def test_get_pvalues_per_index(list1, list2):
     values = get_pvalues_per_index(list1, list2)
     assert np.array(values).shape == (1000,)
 
+def test_create_logger():
+    logger = HLogger(["mock"])
 
-def test_is_running():
+def test_create_sublogger():
+    logger = HLogger(["mock"])
+    sublogger = logger.create_sublogger(["submock"])
+    sublogger.store_result("Hello filecontent")
+    logger.archive_to_file("mylog.yaml")
+
+    gatherer = ResultsGatherer(".", "mylog.yaml")
+    assert gatherer.get_individual_result(["mock","submock"]) == "Hello filecontent"
 
 # this is me Iva
 

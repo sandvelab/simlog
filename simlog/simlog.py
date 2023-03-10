@@ -9,6 +9,8 @@ def get_arrays(sublogger):
     for i in range(100):
         array = np.random.uniform(0, 1, 1000)
         arrays.append(array)
+        #subsub = sublogger.create_sublogger([str(i)])
+        subsub = sublogger.create_sublogger([str(i)])
         sublogger.store_result(array, [str(i)])
     return arrays
 
