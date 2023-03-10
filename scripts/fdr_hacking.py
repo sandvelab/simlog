@@ -1,5 +1,7 @@
 import dataclasses
 import numpy as np
+
+from scripts.config import logger
 from simlog.simlog import get_arrays, get_pvalues_per_index, get_lowest_fdr
 
 
@@ -20,19 +22,30 @@ class PostProcessor:
         pass
 
 
-def main():
-    logger = HLogger("fdrHackingResults")
-    n = 100
-    for i in range(n):
-        list1 = get_arrays(logger.get_sublogger([str(i),"arrayValues","diseased"]))
-        list2 = get_arrays(logger.get_sublogger([str(i),"arrayValues","healthy"]))
-        pvalues = get_pvalues_per_index(list1, list2, logger)
-        lowest_fdrs = np.zeros(n)
-        lowest_fdrs[i] = get_lowest_fdr(pvalues)
-    print("Result")
-    print(lowest_fdrs)
-    print(np.sum(lowest_fdrs < 0.5))
 
+def main():
+    n = 2
+    num_full_experiments = 2
+    for experiment_iter in range(num_full_experiments):
+        for i in range(n):
+            logger.set_prefix_context([str(experiment_iter), str(i)])
+            list1 = get_arrays()
+            logger.log_raw_numbers(list1, ["arrayValues", "healthy"], level=logger.LOW)
+            list2 = get_arrays()
+            logger.log_raw_numbers(list2, ["arrayValues", "diseased"], level=logger.LOW)
+
+            pvalues = get_pvalues_per_index(list1, list2)
+            logger.log_histogram(pvalues, ["pvalues"])
+
+            lowest_fdrs = np.zeros(n)
+            lowest_fdrs[i] = get_lowest_fdr(pvalues)
+        logger.set_prefix_context([str(experiment_iter)])
+        print("Result")
+        print(lowest_fdrs)
+        ALPHA = 0.5
+        num_significant_fdrs = np.sum(lowest_fdrs < ALPHA)
+        print(num_significant_fdrs)
+        logger.log_append(num_significant_fdrs, ["..", "significantFdrs"], level=logger.HIGH) #could have stored in list and logged outside loop..
 
 if __name__ == "__main__":
     main()

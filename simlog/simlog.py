@@ -3,23 +3,21 @@ import numpy as np
 from scipy.stats import ttest_ind
 import numpy as np
 
+from scripts.config import logger
 
-def get_arrays(sublogger):
+
+def get_arrays():
     arrays = []
     for i in range(100):
         array = np.random.uniform(0, 1, 1000)
         arrays.append(array)
-        #subsub = sublogger.create_sublogger([str(i)])
-        subsub = sublogger.create_sublogger([str(i)])
-        sublogger.store_result(array, [str(i)])
     return arrays
 
 
-def get_pvalues_per_index(list1, list2, sublogger):
+def get_pvalues_per_index(list1, list2):
     pvalues = np.zeros(1000)
     for j in range(1000):
         group1 = [list1[i][j] for i in range(100)]
-        sublogger(group1, ["groupValues",str(j)], level=5)
         group2 = [list2[i][j] for i in range(100)]
         _, pvalue = ttest_ind(group1, group2)
         pvalues[j] = pvalue
@@ -40,7 +38,9 @@ def get_fdr(pvalues, alpha=0.05):
 
 def get_lowest_fdr(pvalues):
     fdr = get_fdr(pvalues)
+    logger.log_histogram(fdr, ["fdrs"])
     lowest_fdr = np.min(fdr)
+    logger.log_append(lowest_fdr, ["..","lowestFdrs"], level=logger.HIGH) #Could avoid the ugly ".." by logging the full list of lowest_fdrs, so just to point to a potential weakness of the logger architecture here..
     return lowest_fdr
 
 
