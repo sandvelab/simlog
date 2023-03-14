@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 
 from simlog.logger import HLogger
-from simlog.simlog import get_arrays, get_pvalues_per_index, get_lowest_fdr
+from simlog.simlog import get_methylation_vectors_for_group_of_patients, get_pvalues_per_index, get_lowest_fdr
 
 def test():
     print("hello")
@@ -12,7 +12,7 @@ def test():
 
 @pytest.fixture
 def list1():
-    return get_arrays()
+    return get_methylation_vectors_for_group_of_patients()
 
 @pytest.fixture
 def p_values():
@@ -20,11 +20,11 @@ def p_values():
 
 @pytest.fixture
 def list2():
-    return get_arrays()
+    return get_methylation_vectors_for_group_of_patients()
 
 
-def test_get_arrays():
-    arrays = get_arrays()
+def test_get_methylation_vectors_for_group_of_patients():
+    arrays = get_methylation_vectors_for_group_of_patients()
     assert np.array(arrays).shape == (100, 1000)
 
 
@@ -38,17 +38,3 @@ def test_get_pvalues_per_index(list1, list2):
 
 def test_create_logger():
     logger = HLogger(["mock"])
-
-def test_create_sublogger():
-    logger = HLogger(["mock"])
-    sublogger = logger.create_sublogger(["submock"])
-    sublogger.store_result("Hello filecontent")
-    logger.archive_to_file("mylog.yaml")
-
-    gatherer = ResultsGatherer(".", "mylog.yaml")
-    assert gatherer.get_individual_result(["mock","submock"]) == "Hello filecontent"
-
-# this is me Iva
-
-#
-# this is how we

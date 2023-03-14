@@ -6,19 +6,20 @@ import numpy as np
 from scripts.config import logger
 
 
-def get_arrays():
+def get_methylation_vectors_for_group_of_patients(num_patients, num_methylation_sites):
     arrays = []
-    for i in range(100):
-        array = np.random.uniform(0, 1, 1000)
+    for i in range(num_patients):
+        array = np.random.uniform(0, 1, num_methylation_sites)
         arrays.append(array)
     return arrays
 
 
 def get_pvalues_per_index(list1, list2):
-    pvalues = np.zeros(1000)
-    for j in range(1000):
-        group1 = [list1[i][j] for i in range(100)]
-        group2 = [list2[i][j] for i in range(100)]
+    n_sites = len(list1[0]) #ugly..
+    pvalues = np.zeros(n_sites)
+    for j in range(n_sites):
+        group1 = [list1[i][j] for i in range(len(list1))]
+        group2 = [list2[i][j] for i in range(len(list2))]
         _, pvalue = ttest_ind(group1, group2)
         pvalues[j] = pvalue
     return pvalues
@@ -40,7 +41,7 @@ def get_lowest_fdr(pvalues):
     fdr = get_fdr(pvalues)
     logger.log_histogram(fdr, ["fdrs"])
     lowest_fdr = np.min(fdr)
-    logger.log_append(lowest_fdr, ["..","lowestFdrs"], level=logger.HIGH) #Could avoid the ugly ".." by logging the full list of lowest_fdrs, so just to point to a potential weakness of the logger architecture here..
+    logger.log_raw_text(str(lowest_fdr), ["lowestFdr"], level=logger.HIGH)
     return lowest_fdr
 
 

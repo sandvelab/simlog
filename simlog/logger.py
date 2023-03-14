@@ -40,16 +40,34 @@ class HLogger:
         self.log_raw_numbers([x for x in content], relative_context, level)
 
     def log_raw_numbers(self, content, relative_context : list, level : int = MEDIUM):
+        assert isinstance(content,list), type(content) #just for now..
         if level < self._output_level:
             return
         fn = self._get_fn(relative_context)
-        assert isinstance(content,list), type(content) #just for now..
         outF = open(fn, 'w')
         for el in content:
-            if isinstance(el, numpy.ndarray): #just for now
+            if isinstance(el, numpy.ndarray): #just for now, this function should of course be much more general
                 outF.write(','.join([str(x) for x in el]) + '\n')
             else:
                 outF.write(str(el) + ',')
+        outF.close()
+
+    def log_raw_text(self, content, relative_context : list, level : int = MEDIUM):
+        assert isinstance(content,str), type(content)
+        if level < self._output_level:
+            return
+        fn = self._get_fn(relative_context)
+        outF = open(fn, 'w')
+        outF.write(content)
+        outF.close()
+
+    def log_dict(self, content : dict, relative_context : list, level : int = MEDIUM):
+        assert isinstance(content, dict)
+        if level < self._output_level:
+            return
+        fn = self._get_fn(relative_context)
+        outF = open(fn, 'w')
+        outF.write('\n'.join([':'.join([str(key),str(val)]) for key,val in content.items()]))
         outF.close()
 
     def _get_fn(self, relative_context):
