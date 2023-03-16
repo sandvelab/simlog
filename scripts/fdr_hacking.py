@@ -1,3 +1,7 @@
+import sys
+sys.path.append("..")
+
+
 import dataclasses
 import numpy as np
 
@@ -6,11 +10,12 @@ from simlog.simlog import get_methylation_vectors_for_group_of_patients, get_pva
 
 def main():
     num_full_experiments = 3
-    experiment_settings = [{'n_patients':5, 'n_sites':10}, {'n_patients':50, 'n_sites':100}]
-    for experiment_setting_index, setting in enumerate(experiment_settings):
+    experiment_settings = [{'n_patients':5, 'n_sites':10},
+                           {'n_patients':50, 'n_sites':100}]
+
+    for setting in logger.innerContext(["experiment_"]).iter(experiment_settings):
         lowest_fdrs = np.zeros(num_full_experiments)
-        for experiment_iter in range(num_full_experiments):
-            logger.set_prefix_context([str(experiment_setting_index), str(experiment_iter)])
+        for experiment_iter in logger.innerContext(["iter_"]).range(num_full_experiments):
             logger.log_dict(setting, ["settings"])
 
             healthy_group = get_methylation_vectors_for_group_of_patients(setting['n_patients'], setting['n_sites'])
@@ -23,7 +28,6 @@ def main():
 
             lowest_fdrs[experiment_iter] = get_lowest_fdr(pvalues)
 
-        logger.set_prefix_context([str(experiment_setting_index)])
         print("Result")
         print(lowest_fdrs)
         ALPHA = 0.05
