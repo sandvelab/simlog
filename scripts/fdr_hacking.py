@@ -13,9 +13,9 @@ def main():
     experiment_settings = [{'n_patients':5, 'n_sites':10},
                            {'n_patients':50, 'n_sites':100}]
 
-    for setting in logger.innerContext(["experiment_"]).iter(experiment_settings):
+    for setting in logger.loopContext(["experiment_"]).iter(experiment_settings):
         lowest_fdrs = np.zeros(num_full_experiments)
-        for experiment_iter in logger.innerContext(["iter_"]).range(num_full_experiments):
+        for experiment_iter in logger.loopContext(["iter_"]).range(num_full_experiments):
             logger.log_dict(setting, ["settings"])
 
             healthy_group = get_methylation_vectors_for_group_of_patients(setting['n_patients'], setting['n_sites'])

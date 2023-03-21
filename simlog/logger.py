@@ -73,6 +73,9 @@ class HLogger:
 
     def innerContext(self, context):
         return InnerContext(self, context)
+    
+    def loopContext(self, context):
+        return LoopContext(self, context)
 
 class InnerContext:
     def __init__(self, logger : HLogger, context : list):
@@ -84,6 +87,12 @@ class InnerContext:
 
     def __exit__(self, *args):
         self._logger._extra_contexts.pop()
+
+
+class LoopContext:
+    def __init__(self, logger : HLogger, context : list):
+        self._logger = logger
+        self._context = context
 
     def iter(self, iterable):
         short_context = self._context[:-1]
