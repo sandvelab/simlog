@@ -43,24 +43,21 @@ class HLogger:
     HIGH = 30
     MEDIUM = 20
     LOW = 10
-    def __init__(self, base_context):
+    def __init__(self, base_context, output_level = MEDIUM):
         self._base_context = base_context
-        self._context = base_context
-        self._output_level = self.MEDIUM
+        self._extra_contexts = []
+        self._output_level = output_level
 
-    def set_output_level(self, level):
-        self._output_level = level
+    def _get_context(self):
+        list_of_strings = self._base_context + [item for sublist in self._extra_contexts for item in sublist]
+        return list_of_strings
 
-    def set_prefix_context(self, context):
-        self._context = self._base_context + context
-
-    def log_append(self, content, relative_context : list, level : int = MEDIUM):
+    def log_append(self, content, relative_context : list = [], level : int = MEDIUM):
         if level < self._output_level:
             return
         fn = self._get_fn(relative_context)
-        outF = open(fn, 'a')
-        outF.write(str(content) + ',')
-        outF.close()
+        with open(fn, 'a') as outF:
+            outF.write(str(content) + ',')
 
     def log_histogram(self, content, relative_context : list, level : int = MEDIUM):
         if level < self._output_level:
@@ -105,6 +102,58 @@ class HLogger:
         ensurePathExists(fn)
         return fn
 
+    def innerContext(self, context):
+        return InnerContext(self, context)
+
+    def loopContext(self, context):
+        return LoopContext(self, context)
+
+class InnerContext:
+    def __init__(self, logger : HLogger, context : list):
+        self._logger = logger
+        self._context = context
+
+    def __enter__(self):
+        self._logger._extra_contexts.append(self._context)
+
+    def __exit__(self, *args):
+        self._logger._extra_contexts.pop()
+
+
+class LoopContext:
+    def __init__(self, logger : HLogger, context : list):
+        self._logger = logger
+        self._context = context
+
+    def iter(self, iterable):
+        short_context = self._context[:-1]
+        prefix = self._context[-1]
+
+        loop_context = InnerContext(self._logger, short_context + [f"{prefix}"])
+        for i, item in enumerate(iterable):
+            loop_context._context[-1] = f"{prefix}{i}"
+            with loop_context:
+                yield item
+
+    def range(self, *args):
+        short_context = self._context[:-1]
+        prefix = self._context[-1]
+
+        loop_context = InnerContext(self._logger, short_context + [f"{prefix}"])
+        for i in range(*args):
+            loop_context._context[-1] = f"{prefix}{i}"
+            with loop_context:
+                yield i
+
+    def enumerate(self, *args):
+        short_context = self._context[:-1]
+        prefix = self._context[-1]
+
+        loop_context = InnerContext(self._logger, short_context + [f"{prefix}"])
+        for i, item in enumerate(*args):
+            loop_context._context[-1] = f"{prefix}{i}"
+            with loop_context:
+                yield i, item
     def _write_to_file(self, content, relative_context):
         ##writes content to file.
         fn = self._get_fn(relative_context)
